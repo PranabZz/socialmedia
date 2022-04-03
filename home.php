@@ -7,14 +7,13 @@ error_reporting(E_ALL);
 
 include "connection.php";
 session_start();
+$current_user = $_SESSION['user'];
 
 if (!$_SESSION['loged']) {
   echo "<script>
      location.href = 'login.php';
     </script>";
 }
-
-$htmlspecial = htmlspecialchars($_SERVER['PHP_SELF']);
 
 ?>
 <!DOCTYPE html>
@@ -26,9 +25,14 @@ $htmlspecial = htmlspecialchars($_SERVER['PHP_SELF']);
   <script src="https://kit.fontawesome.com/e5e6ca6b44.js" crossorigin="anonymous"></script>
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rainchat-Privavy matters</title>
-  <link rel="stylesheet" href="output.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>shshsdhdshds</title>
+  <link rel="stylesheet" type="text/css" href="output.css" />
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    input[type="file"] {
+      display: none;
+    }
+  </style>
 </head>
 
 <body class=" m-auto">
@@ -69,12 +73,26 @@ $htmlspecial = htmlspecialchars($_SERVER['PHP_SELF']);
 
     </div>
     <br><br>
-    <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" enctype="multipart/form-data">
-      <input type="textarea" name="post" placeholder="Say something" rows="4" cols="500" required>
-      <input type="file" name="files">
-      <button type="submit" name="send">Send</button>
-    </form>
 
+    <section class="post mx-4 my-4 border-1 md:w-[80%] md:mx-auto">
+      <form class="flex items-center p-4 space-x-2 border rounded-xl md:p-8" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>" method="POST" enctype="multipart/form-data">
+        <div class="user-img">
+          <img class="rounded-[50%] w-8 h-8 object-cover" src="sss.jpg" alt="" />
+        </div>
+
+        <div class="post-area flex-1 text-sm md:text-base overflow-visible">
+          <input class="border border-1 text-black  p-4 w-[100%] " type="text" name="post" id="" placeholder="<?php echo "What's on your mind ? " . $current_user ?>">
+        </div>
+
+        <div class="btn flex flex-col space-y-2 md:flex-row md:space-x-2 items-center justify-center">
+          <input type="file" name="files" id="file">
+          <label for="file">
+          <i class="fa-solid fa-file-arrow-up text-black"></i> Choose a file
+          </label>
+          <input class="bg-blue-700 px-3 py-2  text-white hover:bg-blue-600 transition-all border rounded-md" type="submit" name ="send" value="Post">
+        </div>
+      </form>
+    </section>
     <?php
     $sql1 = "SELECT * FROM `Post` ORDER BY id DESC ";
 
@@ -84,7 +102,7 @@ $htmlspecial = htmlspecialchars($_SERVER['PHP_SELF']);
       echo "
       <div class='blog-post md:w-[80%] md:m-auto mx-4 md:flex md:my-6 md:items-center md:p-6'>
         <div class='blog-image'>
-          <img class='md:object-cover' src='$row[4]' alt='' />
+          <img class='md:object-cover' src='$row[4]' alt='' height='800'; width='600'; />
         </div>
         <div class='content p-2 md:flex-[70%]'>
           <div class='top flex justify-between items-center'>
@@ -155,7 +173,6 @@ $htmlspecial = htmlspecialchars($_SERVER['PHP_SELF']);
 
 <?php
 
-
 if (isset($_POST["logout"])) {
   session_destroy();
   echo "<script>
@@ -164,16 +181,14 @@ if (isset($_POST["logout"])) {
 }
 
 //post files send username time likes and comments is set to null at insert
-if (isset($_POST["send"])) {
+if (isset($_POST['post'])) {
   $current_user = $_SESSION['user'];
   $date = date("h:m:s A");
-  $post = $_POST['post'];
+  $post = FILTER_VAR($_POST['post'], FILTER_SANITIZE_STRING);
   $temp_name = $_FILES['files']['tmp_name'];
   $file_name = $_FILES['files']['name'];
-  $destination = "post_photos/" . $file_name . $date;
+  $destination = "post_photos/".$file_name.$date;
 
-  print_r($_FILES['files']);
-  if ($_FILES['files']['type'] == 'image/jpeg' || $_FILES['files']['type'] == 'image/png') {
 
     move_uploaded_file($temp_name, $destination);
 
@@ -184,14 +199,9 @@ if (isset($_POST["send"])) {
     if (!$result) {
       echo "Bad sql coding";
     }
-  }
-  else{
-    echo "<script>
-      alert('Cannot use this file type use jpeg or png file');
-    </script>";
-  }
-}
-
-
+    if($result){
+      echo "Good coding";
+    }
+  } 
 
 ?>
